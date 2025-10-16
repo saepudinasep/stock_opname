@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useState } from "react";
 
@@ -44,15 +44,40 @@ export default function Navbar({ setIsLoggedIn }) {
             )}
 
             <nav className="flex justify-center gap-6 py-4 bg-gray-800 text-sm text-gray-200">
-                <Link to="/" className="hover:text-indigo-400">
+                <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1"
+                            : "hover:text-indigo-400"
+                    }
+                    end
+                >
                     Home
-                </Link>
-                <Link to="/insert" className="hover:text-indigo-400">
+                </NavLink>
+
+                <NavLink
+                    to="/insert"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1"
+                            : "hover:text-indigo-400"
+                    }
+                >
                     Insert
-                </Link>
-                <Link to="/about" className="hover:text-indigo-400">
+                </NavLink>
+
+                <NavLink
+                    to="/about"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1"
+                            : "hover:text-indigo-400"
+                    }
+                >
                     About
-                </Link>
+                </NavLink>
+
                 <button
                     onClick={handleLogout}
                     className="text-red-400 hover:text-red-300"
