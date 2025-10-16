@@ -2,25 +2,97 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
     const [stats, setStats] = useState([]);
-    const [user, setUser] = useState(null);
+    const [user, setUserData] = useState(null);
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem("userData"));
         if (storedUser) {
-            setUser(storedUser);
-            generateStats(storedUser);
+            setUserData(storedUser);
+            if (storedUser.role === "region") {
+                fetchInsertData(storedUser);
+            } else {
+                generateStats(storedUser);
+            }
         }
     }, []);
 
-    const generateStats = (user) => {
-        // Contoh data simulasi — nanti bisa diganti fetch dari CSV
-        if (user.role === "REGION") {
+    const fetchInsertData = async (user) => {
+        try {
+            const sheetUrl =
+                "https://docs.google.com/spreadsheets/d/e/2PACX-1vQv4Lx5v0oDBHQbioe5FHZMDNLkWuAaO9UPoBqnMOV8DYpDx4csxQkaOAlAdME8PQCjf3ty3qU5P71C/pub?gid=2464077&single=true&output=csv";
+
+            const res = await fetch(sheetUrl);
+            const csvText = await res.text();
+
+            // --- PARSE CSV ---
+            const rows = csvText.split("\n").filter(r => r.trim() !== "");
+            const headers = rows[0].split(",").map(h => h.trim());
+            const data = rows.slice(1).map((r) => {
+                const values = r.split(",");
+                return Object.fromEntries(
+                    headers.map((h, i) => [h.trim(), values[i]?.trim()])
+                );
+            });
+
+            // console.log("=== DEBUG CSV DATA ===");
+            // console.log("Headers:", headers);
+            // console.log("Sample:", data.slice(0, 5));
+
+            // --- AMBIL CABANG HANDLING DARI USER ---
+            const allBranches = user.handling
+                .map((b) => (b.Branch_Code || b.branch_code || "").trim())
+                .filter(Boolean);
+            // console.log("Handling branches:", allBranches);
+
+            // --- AMBIL CABANG DARI SHEET (UNIQUE) ---
+            const uniqueFilledBranches = [
+                ...new Set(
+                    data
+                        .map((d) => d.Branch_Code?.trim())
+                        .filter((v) => v && v !== "Branch_Code")
+                ),
+            ];
+
+            // console.log("Filled branches from sheet:", uniqueFilledBranches);
+
+            // --- FILTER HANYA CABANG YANG ADA DI HANDLING ---
+            const filledBranches = allBranches.filter((b) =>
+                uniqueFilledBranches.includes(b)
+            );
+            const unfilledBranches = allBranches.filter(
+                (b) => !uniqueFilledBranches.includes(b)
+            );
+
+            // console.log("Matched (filled):", filledBranches);
+            // console.log("Unfilled:", unfilledBranches);
+
+            // --- HITUNG TOTAL ---
+            const total = allBranches.length;
+            const filled = filledBranches.length;
+            const unfilled = total - filled;
+
             setStats([
-                { id: 1, name: "Cabang Handling", value: "14 Cabang" },
-                { id: 2, name: "Cabang Sudah Mengisi", value: "7 Cabang" },
-                { id: 3, name: "Cabang Belum Mengisi", value: "7 Cabang" },
+                { id: 1, name: "Cabang Handling", value: `${total} Cabang` },
+                { id: 2, name: "Cabang Sudah Mengisi", value: `${filled} Cabang` },
+                { id: 3, name: "Cabang Belum Mengisi", value: `${unfilled} Cabang` },
             ]);
-        } else if (user.role === "BRANCH") {
+
+            // --- DEBUG DETAIL TABEL ---
+            // console.table({
+            //     total,
+            //     filled,
+            //     unfilled,
+            //     allBranches,
+            //     filledBranches,
+            //     unfilledBranches,
+            // });
+        } catch (err) {
+            console.error("Error fetching or parsing data:", err);
+        }
+    };
+
+    const generateStats = (user) => {
+        if (user.role === "branch") {
             setStats([
                 { id: 1, name: "Unit yang Harus Update", value: "5 Unit" },
                 { id: 2, name: "Sudah Update Hari Ini", value: "3 Unit" },
@@ -36,7 +108,7 @@ export default function Home() {
     };
 
     return (
-        <div className="bg-white py-24 sm:py-32 min-h-screen">
+        <div className="bg-white py-24 sm:py-32 min-h-screen relative">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <h2 className="text-center text-2xl font-bold text-gray-900 mb-10">
                     Dashboard Daily {user ? user.role : ""}

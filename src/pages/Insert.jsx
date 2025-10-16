@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 // --- IMPORT IMAGE ---
 import mbBrosur from "../assets/motorBaru/brosur.jpg";
@@ -21,14 +23,11 @@ import moSpanduk from "../assets/mobilku/spanduk_branding_agent.jpg";
 import moMap from "../assets/mobilku/map_corporate.jpg";
 
 import maBrosur from "../assets/masku/brosur.jpg";
-// import maSurat from "../assets/masku/surat_penawaran.png";
 import maAmplop from "../assets/masku/amplop.png";
 import maEvent from "../assets/masku/event_desk.png";
 
 import hBrosur from "../assets/hajiku/brosur.jpg";
-// import hSurat from "../assets/hajiku/surat_penawaran.png";
 import hAmplop from "../assets/hajiku/amplop.jpg";
-// import hEvent from "../assets/hajiku/event_desk.png";
 import hXBanner from "../assets/hajiku/x_banner.png";
 import hSpanduk from "../assets/hajiku/spanduk_agen.jpg";
 
@@ -36,7 +35,8 @@ export default function Insert() {
     const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku"];
     const [activeTab, setActiveTab] = useState("Motor Baru");
     const [formData, setFormData] = useState({});
-    const [zoomImg, setZoomImg] = useState(null); // state untuk zoom
+    const [zoomImg, setZoomImg] = useState(null);
+    const [loading, setLoading] = useState(false); // 🔹 tambahan state loading
 
     const itemsPerTab = {
         "Motor Baru": [
@@ -59,7 +59,7 @@ export default function Insert() {
             "Surat Penawaran",
             "Amplop",
             "Map Corporate",
-            "Event Desk",
+            "Spanduk Branding Agent",
         ],
         "Masku": ["Brosur & Pricelist", "Surat Penawaran", "Amplop", "Event Desk"],
         "Hajiku": [
@@ -97,15 +97,12 @@ export default function Insert() {
         },
         "Masku": {
             "Brosur & Pricelist": maBrosur,
-            // "Surat Penawaran": maSurat,
             "Amplop": maAmplop,
             "Event Desk": maEvent,
         },
         "Hajiku": {
             "Brosur & Pricelist": hBrosur,
-            // "Surat Penawaran": hSurat,
             "Amplop": hAmplop,
-            // "Event Desk": hEvent,
             "X Banner": hXBanner,
             "Spanduk Agen Hajiku": hSpanduk,
         },
@@ -124,22 +121,88 @@ export default function Insert() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // 🔹 mulai loading
+
         const userData = JSON.parse(localStorage.getItem("userData"));
+        const tabData = formData[activeTab] || {};
+
+        const convertToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (err) => reject(err);
+            });
+        };
+
+        const items = {};
+        for (const key in tabData) {
+            const item = tabData[key];
+            let fileBase64 = "";
+            let fileName = "";
+
+            if (item.file) {
+                fileBase64 = await convertToBase64(item.file);
+                fileName = item.file.name;
+            }
+
+            items[key] = {
+                qty: item.qty || 0,
+                fileBase64,
+                fileName,
+            };
+        }
+
         const payload = {
             user: userData?.username,
             branch: userData?.branch_name,
             region: userData?.region_name,
+            branch_code: userData?.branch_code,
+            region_code: userData?.region_code,
+            role: userData?.role || "BRANCH",
             tab: activeTab,
-            items: formData[activeTab] || {},
+            items,
         };
-        console.log("DATA SUBMIT:", payload);
-        alert("Data berhasil dikirim (lihat console log)");
+
+        try {
+            await fetch(
+                "https://script.google.com/macros/s/AKfycbwcOC4kNdfNPEV2e7-TsS7ye9pSjluTf_jUI6Dm376IOv_ITyfHq_mOsJH4uDf1ryk9lA/exec",
+                {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                }
+            );
+            // alert("✅ Data berhasil dikirim ke server!");
+            Swal.fire({
+                title: "Insert Berhasil!",
+                text: `Berhasil Insert Data ${activeTab}.`,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+
+            setTimeout(() => {
+                setFormData({}); // kosongkan semua input
+                setLoading(false);
+            }, 1500);
+        } catch (error) {
+            console.error("❌ Error:", error);
+            Swal.fire({
+                title: "Gagal!",
+                text: "Terjadi kesalahan saat mengirim data.",
+                icon: "error",
+            });
+            setLoading(false); // 🔹 selesai loading
+        }
     };
 
     return (
         <div className="bg-gray-100 min-h-screen p-10">
+
             <h1 className="text-3xl font-bold text-indigo-600 text-center mb-8">
                 Insert Data Produk
             </h1>
@@ -151,8 +214,9 @@ export default function Insert() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
+                            disabled={loading}
                             className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200
-                    ${activeTab === tab
+                            ${activeTab === tab
                                     ? "text-indigo-600 border-b-2 border-indigo-600"
                                     : "text-gray-500 hover:text-indigo-500"
                                 }`}
@@ -163,8 +227,7 @@ export default function Insert() {
                 </div>
             </div>
 
-
-            {/* TAB CONTENT */}
+            {/* FORM */}
             <form
                 onSubmit={handleSubmit}
                 className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 space-y-6"
@@ -192,7 +255,6 @@ export default function Insert() {
                                 }
                                 className="w-full md:w-1/6 px-3 py-2 rounded border border-gray-300 focus:outline-indigo-500 mb-2 md:mb-0"
                             />
-                            {/* CUSTOM FILE INPUT */}
                             <label className="w-full md:w-2/3 flex items-center gap-4 px-3 py-2 border border-gray-300 rounded cursor-pointer bg-white hover:bg-gray-50 transition">
                                 <span className="text-gray-600">Pilih file / upload</span>
                                 <input
@@ -219,9 +281,13 @@ export default function Insert() {
 
                 <button
                     type="submit"
-                    className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-md transition"
+                    disabled={loading}
+                    className={`mt-6 w-full font-semibold py-3 rounded-md transition ${loading
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                        }`}
                 >
-                    Submit
+                    {loading ? "Mengirim data..." : "Submit"}
                 </button>
             </form>
 
@@ -238,6 +304,8 @@ export default function Insert() {
                     />
                 </div>
             )}
+            {/* 🔹 Loading Overlay */}
+            <LoadingOverlay show={loading} />
         </div>
     );
 }

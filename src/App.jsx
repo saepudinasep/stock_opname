@@ -34,18 +34,46 @@ export default function App() {
                     path="/login"
                     element={<Login setIsLoggedIn={setIsLoggedIn} setUserData={setUserData} />}
                 />
+
+                {/* Home: Region bisa lihat, Branch bisa juga redirect */}
                 <Route
                     path="/"
-                    element={isLoggedIn ? <Home userData={userData} /> : <Navigate to="/login" />}
+                    element={
+                        isLoggedIn ? (
+                            userData?.role === "region" || userData?.role === "branch" ? (
+                                <Home userData={userData} />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
+                        ) : (
+                            <Navigate to="/login" />
+                        )
+                    }
                 />
+
+                {/* Insert: Hanya branch yang bisa */}
                 <Route
                     path="/insert"
-                    element={isLoggedIn ? <Insert userData={userData} /> : <Navigate to="/login" />}
+                    element={
+                        isLoggedIn ? (
+                            userData?.role === "branch" ? (
+                                <Insert userData={userData} />
+                            ) : (
+                                <Navigate to="/" />
+                            )
+                        ) : (
+                            <Navigate to="/login" />
+                        )
+                    }
                 />
+
+                {/* About: Semua login bisa akses */}
                 <Route
                     path="/about"
                     element={isLoggedIn ? <About userData={userData} /> : <Navigate to="/login" />}
                 />
+
+                {/* Catch-all */}
                 <Route
                     path="*"
                     element={<Navigate to={isLoggedIn ? "/" : "/login"} />}

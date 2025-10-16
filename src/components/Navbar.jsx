@@ -1,10 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar({ setIsLoggedIn }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("userData");
+        setUserData(storedUser ? JSON.parse(storedUser) : null);
+    }, []);
 
     const handleLogout = () => {
         Swal.fire({
@@ -43,7 +49,7 @@ export default function Navbar({ setIsLoggedIn }) {
                 </div>
             )}
 
-            <nav className="flex justify-center gap-6 py-4 bg-gray-800 text-sm text-gray-200">
+            <nav className="flex justify-center gap-6 py-4 bg-gray-800 text-sm text-gray-200 flex-wrap">
                 <NavLink
                     to="/"
                     className={({ isActive }) =>
@@ -56,16 +62,19 @@ export default function Navbar({ setIsLoggedIn }) {
                     Home
                 </NavLink>
 
-                <NavLink
-                    to="/insert"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1"
-                            : "hover:text-indigo-400"
-                    }
-                >
-                    Insert
-                </NavLink>
+                {/* Insert hanya untuk branch */}
+                {userData?.role === "branch" && (
+                    <NavLink
+                        to="/insert"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1"
+                                : "hover:text-indigo-400"
+                        }
+                    >
+                        Insert
+                    </NavLink>
+                )}
 
                 <NavLink
                     to="/about"
