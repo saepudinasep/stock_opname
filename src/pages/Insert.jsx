@@ -145,21 +145,24 @@ export default function Insert() {
             </h1>
 
             {/* TAB HEADER */}
-            <div className="flex justify-center mb-8 border-b border-gray-300">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-6 py-3 text-sm font-medium transition-all duration-200
-                            ${activeTab === tab
-                                ? "text-indigo-600 border-b-2 border-indigo-600"
-                                : "text-gray-500 hover:text-indigo-500"
-                            }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
+            <div className="overflow-x-auto border-b border-gray-300 mb-8">
+                <div className="flex min-w-max justify-start md:justify-center">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200
+                    ${activeTab === tab
+                                    ? "text-indigo-600 border-b-2 border-indigo-600"
+                                    : "text-gray-500 hover:text-indigo-500"
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
             </div>
+
 
             {/* TAB CONTENT */}
             <form
