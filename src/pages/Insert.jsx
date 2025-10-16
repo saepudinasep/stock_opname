@@ -1,9 +1,42 @@
 import { useState } from "react";
 
+// --- IMPORT IMAGE ---
+import mbBrosur from "../assets/motorBaru/brosur.jpg";
+import mbSurat from "../assets/motorBaru/surat_penawaran.png";
+import mbAmplop from "../assets/motorBaru/amplop.png";
+import mbMap from "../assets/motorBaru/map_corporate.jpg";
+import mbBooklet from "../assets/motorBaru/booklet_collaboration.jpg";
+import mbEvent from "../assets/motorBaru/event_desk.png";
+
+import mkBrosur from "../assets/motorku/brosur.jpg";
+import mkSurat from "../assets/motorku/surat_penawaran.jpg";
+import mkAmplop from "../assets/motorku/amplop.jpg";
+import mkSpanduk from "../assets/motorku/spanduk_branding_agent.png";
+import mkEvent from "../assets/motorku/event_desk.jpg";
+
+import moBrosur from "../assets/mobilku/brosur.png";
+import moSurat from "../assets/mobilku/surat_penawaran.jpg";
+import moAmplop from "../assets/mobilku/amplop.jpg";
+import moSpanduk from "../assets/mobilku/spanduk_branding_agent.jpg";
+import moMap from "../assets/mobilku/map_corporate.jpg";
+
+import maBrosur from "../assets/masku/brosur.jpg";
+// import maSurat from "../assets/masku/surat_penawaran.png";
+import maAmplop from "../assets/masku/amplop.png";
+import maEvent from "../assets/masku/event_desk.png";
+
+import hBrosur from "../assets/hajiku/brosur.jpg";
+// import hSurat from "../assets/hajiku/surat_penawaran.png";
+import hAmplop from "../assets/hajiku/amplop.jpg";
+// import hEvent from "../assets/hajiku/event_desk.png";
+import hXBanner from "../assets/hajiku/x_banner.png";
+import hSpanduk from "../assets/hajiku/spanduk_agen.jpg";
+
 export default function Insert() {
     const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku"];
     const [activeTab, setActiveTab] = useState("Motor Baru");
-    const [formData, setFormData] = useState({}); // { tabName: { itemName: { qty, file } } }
+    const [formData, setFormData] = useState({});
+    const [zoomImg, setZoomImg] = useState(null); // state untuk zoom
 
     const itemsPerTab = {
         "Motor Baru": [
@@ -28,12 +61,7 @@ export default function Insert() {
             "Map Corporate",
             "Event Desk",
         ],
-        "Masku": [
-            "Brosur & Pricelist",
-            "Surat Penawaran",
-            "Amplop",
-            "Event Desk",
-        ],
+        "Masku": ["Brosur & Pricelist", "Surat Penawaran", "Amplop", "Event Desk"],
         "Hajiku": [
             "Brosur & Pricelist",
             "Surat Penawaran",
@@ -42,6 +70,45 @@ export default function Insert() {
             "X Banner",
             "Spanduk Agen Hajiku",
         ],
+    };
+
+    const defaultImages = {
+        "Motor Baru": {
+            "Brosur & Pricelist": mbBrosur,
+            "Surat Penawaran": mbSurat,
+            "Amplop": mbAmplop,
+            "Map Corporate": mbMap,
+            "Booklet Collaboration": mbBooklet,
+            "Event Desk": mbEvent,
+        },
+        "Motorku": {
+            "Brosur & Pricelist": mkBrosur,
+            "Surat Penawaran": mkSurat,
+            "Amplop": mkAmplop,
+            "Spanduk Branding Agent": mkSpanduk,
+            "Event Desk": mkEvent,
+        },
+        "Mobilku": {
+            "Brosur & Pricelist": moBrosur,
+            "Surat Penawaran": moSurat,
+            "Amplop": moAmplop,
+            "Map Corporate": moMap,
+            "Spanduk Branding Agent": moSpanduk,
+        },
+        "Masku": {
+            "Brosur & Pricelist": maBrosur,
+            // "Surat Penawaran": maSurat,
+            "Amplop": maAmplop,
+            "Event Desk": maEvent,
+        },
+        "Hajiku": {
+            "Brosur & Pricelist": hBrosur,
+            // "Surat Penawaran": hSurat,
+            "Amplop": hAmplop,
+            // "Event Desk": hEvent,
+            "X Banner": hXBanner,
+            "Spanduk Agen Hajiku": hSpanduk,
+        },
     };
 
     const handleInputChange = (tab, item, field, value) => {
@@ -68,21 +135,17 @@ export default function Insert() {
             items: formData[activeTab] || {},
         };
         console.log("DATA SUBMIT:", payload);
-
-        // TODO:
-        // 1. Kirim ke Google Form menggunakan fetch POST
-        // 2. Upload file ke Google Drive via Apps Script API
         alert("Data berhasil dikirim (lihat console log)");
     };
 
     return (
-        <div className="bg-white min-h-screen p-10">
+        <div className="bg-gray-100 min-h-screen p-10">
             <h1 className="text-3xl font-bold text-indigo-600 text-center mb-8">
                 Insert Data Produk
             </h1>
 
             {/* TAB HEADER */}
-            <div className="flex justify-center mb-8 border-b border-gray-200">
+            <div className="flex justify-center mb-8 border-b border-gray-300">
                 {tabs.map((tab) => (
                     <button
                         key={tab}
@@ -101,40 +164,48 @@ export default function Insert() {
             {/* TAB CONTENT */}
             <form
                 onSubmit={handleSubmit}
-                className="max-w-3xl mx-auto bg-gray-50 rounded-xl shadow-md p-8 space-y-6"
+                className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 space-y-6"
             >
-                {itemsPerTab[activeTab].map((item) => (
-                    <div key={item} className="flex flex-col md:flex-row md:items-center md:gap-4">
-                        <label className="w-full md:w-1/3 font-semibold text-gray-700">
-                            {item}
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            placeholder="Jumlah"
-                            value={formData[activeTab]?.[item]?.qty || ""}
-                            onChange={(e) =>
-                                handleInputChange(activeTab, item, "qty", e.target.value)
-                            }
-                            className="w-full md:w-1/6 px-3 py-2 rounded border border-gray-300 focus:outline-indigo-500 mb-2 md:mb-0"
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                                handleInputChange(activeTab, item, "file", e.target.files[0])
-                            }
-                            className="w-full md:w-2/3"
-                        />
-                        {formData[activeTab]?.[item]?.file && (
-                            <img
-                                src={URL.createObjectURL(formData[activeTab][item].file)}
-                                alt="preview"
-                                className="h-16 w-16 object-cover mt-2 md:mt-0 rounded"
+                {itemsPerTab[activeTab].map((item) => {
+                    const imgSrc = formData[activeTab]?.[item]?.file
+                        ? URL.createObjectURL(formData[activeTab][item].file)
+                        : defaultImages[activeTab]?.[item];
+
+                    return (
+                        <div
+                            key={item}
+                            className="flex flex-col md:flex-row md:items-center md:gap-4"
+                        >
+                            <label className="w-full md:w-1/3 font-semibold text-gray-700">
+                                {item}
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                placeholder="Jumlah"
+                                value={formData[activeTab]?.[item]?.qty || ""}
+                                onChange={(e) =>
+                                    handleInputChange(activeTab, item, "qty", e.target.value)
+                                }
+                                className="w-full md:w-1/6 px-3 py-2 rounded border border-gray-300 focus:outline-indigo-500 mb-2 md:mb-0"
                             />
-                        )}
-                    </div>
-                ))}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    handleInputChange(activeTab, item, "file", e.target.files[0])
+                                }
+                                className="w-full md:w-2/3"
+                            />
+                            <img
+                                src={imgSrc}
+                                alt="preview"
+                                onClick={() => setZoomImg(imgSrc)}
+                                className="h-16 w-16 object-cover mt-2 md:mt-0 rounded cursor-pointer hover:scale-105 transition"
+                            />
+                        </div>
+                    );
+                })}
 
                 <button
                     type="submit"
@@ -143,6 +214,20 @@ export default function Insert() {
                     Submit
                 </button>
             </form>
+
+            {/* MODAL ZOOM */}
+            {zoomImg && (
+                <div
+                    onClick={() => setZoomImg(null)}
+                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
+                >
+                    <img
+                        src={zoomImg}
+                        alt="zoom"
+                        className="max-h-[80%] max-w-[80%] rounded-md shadow-lg"
+                    />
+                </div>
+            )}
         </div>
     );
 }
