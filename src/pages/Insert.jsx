@@ -192,14 +192,21 @@ export default function Insert() {
                                 }
                                 className="w-full md:w-1/6 px-3 py-2 rounded border border-gray-300 focus:outline-indigo-500 mb-2 md:mb-0"
                             />
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) =>
-                                    handleInputChange(activeTab, item, "file", e.target.files[0])
-                                }
-                                className="w-full md:w-2/3"
-                            />
+                            {/* CUSTOM FILE INPUT */}
+                            <label className="w-full md:w-2/3 flex items-center gap-4 px-3 py-2 border border-gray-300 rounded cursor-pointer bg-white hover:bg-gray-50 transition">
+                                <span className="text-gray-600">Pilih file / upload</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        handleInputChange(activeTab, item, "file", e.target.files[0])
+                                    }
+                                    className="hidden"
+                                />
+                                {formData[activeTab]?.[item]?.file && (
+                                    <span className="text-sm text-green-600">File siap diupload</span>
+                                )}
+                            </label>
                             <img
                                 src={imgSrc}
                                 alt="preview"
