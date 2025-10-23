@@ -31,8 +31,17 @@ import hAmplop from "../assets/hajiku/amplop.jpg";
 import hXBanner from "../assets/hajiku/x_banner.png";
 import hSpanduk from "../assets/hajiku/spanduk_agen.jpg";
 
+import sHelm from "../assets/souvenir/Help.png";
+import sJaket from "../assets/souvenir/Jaket.png";
+import sJam from "../assets/souvenir/Jam dinding.png";
+import sMug from "../assets/souvenir/Mug.png";
+import sPayung from "../assets/souvenir/Payung.png";
+import sPouch from "../assets/souvenir/Pouch.png";
+import sTas from "../assets/souvenir/Tas.png";
+import sToples from "../assets/souvenir/Toples.png";
+
 export default function Insert() {
-    const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku"];
+    const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku", "Souvenir"];
     const [activeTab, setActiveTab] = useState("Motor Baru");
     const [formData, setFormData] = useState({});
     const [zoomImg, setZoomImg] = useState(null);
@@ -60,6 +69,7 @@ export default function Insert() {
             "Amplop",
             "Map Corporate",
             "Spanduk Branding Agent",
+            "Event Desk",
         ],
         "Masku": ["Brosur & Pricelist", "Surat Penawaran", "Amplop", "Event Desk"],
         "Hajiku": [
@@ -69,6 +79,16 @@ export default function Insert() {
             "Event Desk",
             "X Banner",
             "Spanduk Agen Hajiku",
+        ],
+        "Souvenir": [
+            "Jaket",
+            "Toples",
+            "Tas",
+            "Pouch",
+            "Merchandise (MUG)",
+            "Helm",
+            "Jam Dinding",
+            "Payung",
         ],
     };
 
@@ -94,17 +114,30 @@ export default function Insert() {
             "Amplop": moAmplop,
             "Map Corporate": moMap,
             "Spanduk Branding Agent": moSpanduk,
+            "Event Desk": moSpanduk,
         },
         "Masku": {
             "Brosur & Pricelist": maBrosur,
+            "Surat Penawaran": maAmplop,
             "Amplop": maAmplop,
             "Event Desk": maEvent,
         },
         "Hajiku": {
             "Brosur & Pricelist": hBrosur,
+            "Surat Penawaran": hAmplop,
             "Amplop": hAmplop,
             "X Banner": hXBanner,
             "Spanduk Agen Hajiku": hSpanduk,
+        },
+        "Souvenir": {
+            "Jaket": sJaket,
+            "Toples": sToples,
+            "Tas": sTas,
+            "Pouch": sPouch,
+            "Merchandise (MUG)": sMug,
+            "Helm": sHelm,
+            "Jam Dinding": sJam,
+            "Payung": sPayung,
         },
     };
 
@@ -168,7 +201,7 @@ export default function Insert() {
 
         try {
             await fetch(
-                "https://script.google.com/macros/s/AKfycbwcOC4kNdfNPEV2e7-TsS7ye9pSjluTf_jUI6Dm376IOv_ITyfHq_mOsJH4uDf1ryk9lA/exec",
+                "https://script.google.com/macros/s/AKfycbyAUhvIjKX-ER-KQrbEgkqvfTmtKzec1dKMKX8QuKknYeyPsJqdRwJIDvmLyXV8l4JF/exec",
                 {
                     method: "POST",
                     mode: "no-cors",
