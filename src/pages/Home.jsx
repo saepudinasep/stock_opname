@@ -195,56 +195,83 @@ export default function Dashboard({ setIsLoggedIn }) {
     const renderCharts = () => {
         if (role === "Head Office") {
             return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ChartCard
-                        title="Persentase Region Sudah vs Belum"
-                        type="pie"
-                        data={[
-                            { name: "Sudah", value: summary.regionFilled },
-                            {
-                                name: "Belum",
-                                value:
-                                    summary.regionTotal - summary.regionFilled,
-                            },
-                        ]}
-                        dataKey="value"
-                        nameKey="name"
-                    />
-                    <ChartCard
-                        title="Persentase Branch Sudah vs Belum"
-                        type="pie"
-                        data={[
-                            { name: "Sudah", value: summary.branchFilled },
-                            {
-                                name: "Belum",
-                                value:
-                                    summary.branchTotal - summary.branchFilled,
-                            },
-                        ]}
-                        dataKey="value"
-                        nameKey="name"
-                    />
+                <div className="overflow-x-auto">
+                    <div className="flex flex-col md:grid md:grid-cols-2 gap-4 min-w-[600px] md:min-w-0">
+                        <ChartCard
+                            title="Persentase Region Sudah vs Belum"
+                            type="pie"
+                            data={[
+                                { name: "Sudah", value: summary.regionFilled },
+                                {
+                                    name: "Belum",
+                                    value:
+                                        summary.regionTotal - summary.regionFilled,
+                                },
+                            ]}
+                            dataKey="value"
+                            nameKey="name"
+                        />
+                        <ChartCard
+                            title="Persentase Branch Sudah vs Belum"
+                            type="pie"
+                            data={[
+                                { name: "Sudah", value: summary.branchFilled },
+                                {
+                                    name: "Belum",
+                                    value:
+                                        summary.branchTotal - summary.branchFilled,
+                                },
+                            ]}
+                            dataKey="value"
+                            nameKey="name"
+                        />
+                    </div>
                 </div>
             );
         }
 
         if (role === "region") {
             return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ChartCard
-                        title="Branch Handling Sudah vs Belum"
-                        type="pie"
-                        data={[
-                            { name: "Sudah", value: summary.branchFilled },
-                            {
-                                name: "Belum",
-                                value:
-                                    summary.branchTotal - summary.branchFilled,
-                            },
-                        ]}
-                        dataKey="value"
-                        nameKey="name"
-                    />
+                <div className="overflow-x-auto">
+                    <div className="flex flex-col md:grid md:grid-cols-2 gap-4 min-w-[600px] md:min-w-0">
+                        <ChartCard
+                            title="Branch Handling Sudah vs Belum"
+                            type="pie"
+                            data={[
+                                { name: "Sudah", value: summary.branchFilled },
+                                {
+                                    name: "Belum",
+                                    value:
+                                        summary.branchTotal - summary.branchFilled,
+                                },
+                            ]}
+                            dataKey="value"
+                            nameKey="name"
+                        />
+                        <ChartCard
+                            title="Kategori Sudah vs Belum"
+                            type="pie"
+                            data={[
+                                { name: "Sudah", value: summary.categoryFilled },
+                                {
+                                    name: "Belum",
+                                    value:
+                                        summary.categoryTotal -
+                                        summary.categoryFilled,
+                                },
+                            ]}
+                            dataKey="value"
+                            nameKey="name"
+                        />
+                    </div>
+                </div>
+            );
+        }
+
+        // Branch
+        return (
+            <div className="overflow-x-auto">
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-4 min-w-[600px] md:min-w-0">
                     <ChartCard
                         title="Kategori Sudah vs Belum"
                         type="pie"
@@ -260,38 +287,18 @@ export default function Dashboard({ setIsLoggedIn }) {
                         dataKey="value"
                         nameKey="name"
                     />
+                    <ChartCard
+                        title="Total Item per Kategori"
+                        type="bar"
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="name"
+                    />
                 </div>
-            );
-        }
-
-        // Branch
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ChartCard
-                    title="Kategori Sudah vs Belum"
-                    type="pie"
-                    data={[
-                        { name: "Sudah", value: summary.categoryFilled },
-                        {
-                            name: "Belum",
-                            value:
-                                summary.categoryTotal -
-                                summary.categoryFilled,
-                        },
-                    ]}
-                    dataKey="value"
-                    nameKey="name"
-                />
-                <ChartCard
-                    title="Total Item per Kategori"
-                    type="bar"
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                />
             </div>
         );
     };
+
 
     // ==========================================================
     // 🔸 Render Dashboard
