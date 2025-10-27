@@ -1,132 +1,280 @@
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import SummaryCard from "../components/SummaryCard";
+import ChartCard from "../components/ChartCard";
+import ActivityTable from "../components/ActivityTable";
+import { useNavigate } from "react-router-dom";
 
-export default function Home() {
-    const [stats, setStats] = useState([]);
-    const [user, setUserData] = useState(null);
+export default function Dashboard({ setIsLoggedIn }) {
+    const [userData, setUserData] = useState(null);
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const API_URL =
+        "https://script.google.com/macros/s/AKfycbx6hpP8vOh7bXIIYmX6bUozBXc8ZqIPY_h1Uwvg3bSN6bkDiJYIruSLMq2frJBVu7N5/exec"; // Ganti dengan URL Apps Script kamu
 
     useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem("userData"));
-        if (storedUser) {
-            setUserData(storedUser);
-            if (storedUser.role === "region") {
-                fetchInsertData(storedUser);
-            } else {
-                generateStats(storedUser);
-            }
-        }
-    }, []);
+        const saved = localStorage.getItem("userData");
+        const loggedIn = localStorage.getItem("loggedIn");
 
-    const fetchInsertData = async (user) => {
-        try {
-            const sheetUrl =
-                "https://docs.google.com/spreadsheets/d/e/2PACX-1vQv4Lx5v0oDBHQbioe5FHZMDNLkWuAaO9UPoBqnMOV8DYpDx4csxQkaOAlAdME8PQCjf3ty3qU5P71C/pub?gid=2464077&single=true&output=csv";
-
-            const res = await fetch(sheetUrl);
-            const csvText = await res.text();
-
-            // --- PARSE CSV ---
-            const rows = csvText.split("\n").filter(r => r.trim() !== "");
-            const headers = rows[0].split(",").map(h => h.trim());
-            const data = rows.slice(1).map((r) => {
-                const values = r.split(",");
-                return Object.fromEntries(
-                    headers.map((h, i) => [h.trim(), values[i]?.trim()])
-                );
+        if (loggedIn !== "true" || !saved) {
+            Swal.fire({
+                title: "Session Habis",
+                text: "Silakan login ulang.",
+                icon: "warning",
+                confirmButtonColor: "#6366F1",
+            }).then(() => {
+                setIsLoggedIn(false);
+                setUserData(null);
+                navigate("/login");
             });
-
-            // console.log("=== DEBUG CSV DATA ===");
-            // console.log("Headers:", headers);
-            // console.log("Sample:", data.slice(0, 5));
-
-            // --- AMBIL CABANG HANDLING DARI USER ---
-            const allBranches = user.handling
-                .map((b) => (b.Branch_Code || b.branch_code || "").trim())
-                .filter(Boolean);
-            // console.log("Handling branches:", allBranches);
-
-            // --- AMBIL CABANG DARI SHEET (UNIQUE) ---
-            const uniqueFilledBranches = [
-                ...new Set(
-                    data
-                        .map((d) => d.Branch_Code?.trim())
-                        .filter((v) => v && v !== "Branch_Code")
-                ),
-            ];
-
-            // console.log("Filled branches from sheet:", uniqueFilledBranches);
-
-            // --- FILTER HANYA CABANG YANG ADA DI HANDLING ---
-            const filledBranches = allBranches.filter((b) =>
-                uniqueFilledBranches.includes(b)
-            );
-            const unfilledBranches = allBranches.filter(
-                (b) => !uniqueFilledBranches.includes(b)
-            );
-
-            // console.log("Matched (filled):", filledBranches);
-            // console.log("Unfilled:", unfilledBranches);
-
-            // --- HITUNG TOTAL ---
-            const total = allBranches.length;
-            const filled = filledBranches.length;
-            const unfilled = total - filled;
-
-            setStats([
-                { id: 1, name: "Cabang Handling", value: `${total} Cabang` },
-                { id: 2, name: "Cabang Sudah Mengisi", value: `${filled} Cabang` },
-                { id: 3, name: "Cabang Belum Mengisi", value: `${unfilled} Cabang` },
-            ]);
-
-            // --- DEBUG DETAIL TABEL ---
-            // console.table({
-            //     total,
-            //     filled,
-            //     unfilled,
-            //     allBranches,
-            //     filledBranches,
-            //     unfilledBranches,
-            // });
-        } catch (err) {
-            console.error("Error fetching or parsing data:", err);
+            return;
         }
+
+        const user = JSON.parse(saved);
+        setUserData(user);
+        setIsLoggedIn(true);
+
+        const url = `${API_URL}?action=getDashboard&role=${user.role}&username=${user.username}&branch_code=${user.branch_code}&region_code=${user.region_code}`;
+
+        fetch(url)
+            .then((res) => res.json())
+            .then((data) => setDashboardData(data))
+            .catch((err) => {
+                console.error("Gagal memuat dashboard:", err);
+                Swal.fire("Error", "Gagal memuat data dashboard", "error");
+            })
+            .finally(() => setLoading(false));
+    }, [navigate, setIsLoggedIn, setUserData]);
+
+    if (loading)
+        return (
+            <div className="flex h-screen items-center justify-center bg-gray-50">
+                <div className="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full"></div>
+            </div>
+        );
+
+    if (!dashboardData || !userData)
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <p>Data tidak ditemukan</p>
+            </div>
+        );
+
+    const { summary, chart, activities } = dashboardData;
+    const { role } = userData;
+
+    // 🔹 Convert chart data
+    const chartData = Object.entries(chart || {}).map(([name, value]) => ({
+        name,
+        value,
+    }));
+
+    // ==========================================================
+    // 🔸 Layout & Summary per Role
+    // ==========================================================
+    const renderSummaryCards = () => {
+        if (role === "Head Office") {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <SummaryCard
+                        title="Jumlah Region"
+                        subtitle="(Sudah vs Belum)"
+                        value={`${summary.regionFilled}/${summary.regionTotal}`}
+                        color="bg-indigo-100"
+                    />
+                    <SummaryCard
+                        title="Total Branch"
+                        subtitle="(Sudah vs Belum)"
+                        value={`${summary.branchFilled}/${summary.branchTotal}`}
+                        color="bg-blue-100"
+                    />
+                    <SummaryCard
+                        title="Total Item"
+                        value={summary.totalItems}
+                        color="bg-green-100"
+                    />
+                    <SummaryCard
+                        title="Kategori"
+                        subtitle="(Sudah vs Belum)"
+                        value={`${summary.categoryFilled}/${summary.categoryTotal}`}
+                        color="bg-yellow-100"
+                    />
+                </div>
+            );
+        }
+
+        if (role === "region") {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <SummaryCard
+                        title="Jumlah Branch Handling"
+                        subtitle="(Sudah vs Belum)"
+                        value={`${summary.branchFilled}/${summary.branchTotal}`}
+                        color="bg-indigo-100"
+                    />
+                    <SummaryCard
+                        title="Total Item"
+                        value={summary.totalItems}
+                        color="bg-green-100"
+                    />
+                    <SummaryCard
+                        title="Kategori"
+                        subtitle="(Sudah vs Belum)"
+                        value={`${summary.categoryFilled}/${summary.categoryTotal}`}
+                        color="bg-yellow-100"
+                    />
+                </div>
+            );
+        }
+
+        // Default: Branch
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SummaryCard
+                    title="Total Item"
+                    value={summary.totalItems}
+                    color="bg-green-100"
+                />
+                <SummaryCard
+                    title="Kategori"
+                    subtitle="(Sudah vs Belum)"
+                    value={`${summary.categoryFilled}/${summary.categoryTotal}`}
+                    color="bg-yellow-100"
+                />
+            </div>
+        );
     };
 
-    const generateStats = (user) => {
-        if (user.role === "branch") {
-            setStats([
-                { id: 1, name: "Unit yang Harus Update", value: "5 Unit" },
-                { id: 2, name: "Sudah Update Hari Ini", value: "3 Unit" },
-                { id: 3, name: "Belum Update", value: "2 Unit" },
-            ]);
-        } else {
-            setStats([
-                { id: 1, name: "Total Region", value: "5 Region" },
-                { id: 2, name: "Total Branch", value: "48 Branch" },
-                { id: 3, name: "Total Handling", value: "320 Handling" },
-            ]);
+    // ==========================================================
+    // 🔸 Charts per Role
+    // ==========================================================
+    const renderCharts = () => {
+        if (role === "Head Office") {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ChartCard
+                        title="Persentase Region Sudah vs Belum"
+                        type="pie"
+                        data={[
+                            { name: "Sudah", value: summary.regionFilled },
+                            {
+                                name: "Belum",
+                                value:
+                                    summary.regionTotal - summary.regionFilled,
+                            },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                    />
+                    <ChartCard
+                        title="Persentase Branch Sudah vs Belum"
+                        type="pie"
+                        data={[
+                            { name: "Sudah", value: summary.branchFilled },
+                            {
+                                name: "Belum",
+                                value:
+                                    summary.branchTotal - summary.branchFilled,
+                            },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                    />
+                </div>
+            );
         }
+
+        if (role === "Region") {
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ChartCard
+                        title="Branch Handling Sudah vs Belum"
+                        type="pie"
+                        data={[
+                            { name: "Sudah", value: summary.branchFilled },
+                            {
+                                name: "Belum",
+                                value:
+                                    summary.branchTotal - summary.branchFilled,
+                            },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                    />
+                    <ChartCard
+                        title="Kategori Sudah vs Belum"
+                        type="pie"
+                        data={[
+                            { name: "Sudah", value: summary.categoryFilled },
+                            {
+                                name: "Belum",
+                                value:
+                                    summary.categoryTotal -
+                                    summary.categoryFilled,
+                            },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                    />
+                </div>
+            );
+        }
+
+        // Branch
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ChartCard
+                    title="Kategori Sudah vs Belum"
+                    type="pie"
+                    data={[
+                        { name: "Sudah", value: summary.categoryFilled },
+                        {
+                            name: "Belum",
+                            value:
+                                summary.categoryTotal -
+                                summary.categoryFilled,
+                        },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                />
+                <ChartCard
+                    title="Total Item per Kategori"
+                    type="bar"
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                />
+            </div>
+        );
     };
 
+    // ==========================================================
+    // 🔸 Render Dashboard
+    // ==========================================================
     return (
-        <div className="bg-white py-24 sm:py-32 min-h-screen relative">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <h2 className="text-center text-2xl font-bold text-gray-900 mb-10">
-                    Dashboard Daily {user ? user.role : ""}
-                </h2>
+        <div className="min-h-screen bg-gray-100 p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-gray-800">
+                        Dashboard{" "}
+                        {role === "Head Office"
+                            ? "Pusat"
+                            : userData.region_name || userData.branch_name}
+                    </h1>
+                </div>
 
-                <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
-                    {stats.map((stat) => (
-                        <div
-                            key={stat.id}
-                            className="mx-auto flex max-w-xs flex-col gap-y-4 bg-gray-50 shadow-md rounded-xl p-6"
-                        >
-                            <dt className="text-base text-gray-600">{stat.name}</dt>
-                            <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                                {stat.value}
-                            </dd>
-                        </div>
-                    ))}
-                </dl>
+                {/* Summary */}
+                {renderSummaryCards()}
+
+                {/* Charts */}
+                {renderCharts()}
+
+                {/* Activity Table */}
+                <ActivityTable data={activities} />
             </div>
         </div>
     );

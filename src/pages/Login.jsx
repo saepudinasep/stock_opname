@@ -11,9 +11,9 @@ export default function Login({ setIsLoggedIn, setUserData }) {
 
     // Ganti dengan URL hasil Publish to Web CSV milik kamu
     const USERS_URL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQv4Lx5v0oDBHQbioe5FHZMDNLkWuAaO9UPoBqnMOV8DYpDx4csxQkaOAlAdME8PQCjf3ty3qU5P71C/pub?gid=1938563269&single=true&output=csv";
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTALQiCiwRkD2lvwiTLxdxRD7tV3vbjq4tsclaRG4tTcLyvk5OznIqj4IoM7n-2PeOZIydAboP6mhZp/pub?gid=0&single=true&output=csv";
     const HANDLING_URL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQv4Lx5v0oDBHQbioe5FHZMDNLkWuAaO9UPoBqnMOV8DYpDx4csxQkaOAlAdME8PQCjf3ty3qU5P71C/pub?gid=57016800&single=true&output=csv";
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTALQiCiwRkD2lvwiTLxdxRD7tV3vbjq4tsclaRG4tTcLyvk5OznIqj4IoM7n-2PeOZIydAboP6mhZp/pub?gid=322655027&single=true&output=csv";
 
     useEffect(() => {
         if (localStorage.getItem("loggedIn") === "true") {

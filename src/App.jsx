@@ -40,8 +40,8 @@ export default function App() {
                     path="/"
                     element={
                         isLoggedIn ? (
-                            userData?.role === "region" || userData?.role === "branch" ? (
-                                <Home userData={userData} />
+                            userData?.role === "region" || userData?.role === "branch" || userData?.role === "Head Office" ? (
+                                <Home setIsLoggedIn={setIsLoggedIn} userData={userData} />
                             ) : (
                                 <Navigate to="/login" />
                             )

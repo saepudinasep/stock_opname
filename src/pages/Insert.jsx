@@ -31,7 +31,7 @@ import hAmplop from "../assets/hajiku/amplop.jpg";
 import hXBanner from "../assets/hajiku/x_banner.png";
 import hSpanduk from "../assets/hajiku/spanduk_agen.jpg";
 
-import sHelm from "../assets/souvenir/Help.png";
+import sHelm from "../assets/souvenir/Helm.png";
 import sJaket from "../assets/souvenir/Jaket.png";
 import sJam from "../assets/souvenir/Jam dinding.png";
 import sMug from "../assets/souvenir/Mug.png";
@@ -201,11 +201,9 @@ export default function Insert() {
 
         try {
             await fetch(
-                "https://script.google.com/macros/s/AKfycbyAUhvIjKX-ER-KQrbEgkqvfTmtKzec1dKMKX8QuKknYeyPsJqdRwJIDvmLyXV8l4JF/exec",
+                "https://script.google.com/macros/s/AKfycbydM7j_3Joc3EJmLbUh4qGZO-kQlcVFLzi2xKnl0Rr_JbwMfaULbAwUwm9yHQslnJ2N/exec",
                 {
                     method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 }
             );
