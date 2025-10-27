@@ -66,10 +66,52 @@ export default function Dashboard({ setIsLoggedIn }) {
     const { role } = userData;
 
     // 🔹 Convert chart data
-    const chartData = Object.entries(chart || {}).map(([name, value]) => ({
-        name,
-        value,
-    }));
+    // const chartData = Object.entries(chart || {}).map(([name, value]) => ({
+    //     name,
+    //     value,
+    // }));
+    // const chartData = Object.entries(chart || {}).flatMap(([chartName, chartValue]) => {
+    //     if (typeof chartValue === "object" && chartValue !== null) {
+    //         return Object.entries(chartValue).map(([key, val]) => ({
+    //             name: key,
+    //             value: val,
+    //         }));
+    //     } else {
+    //         return [{ name: chartName, value: chartValue }];
+    //     }
+    // });
+
+    const CATEGORY_LIST = [
+        "Motor Baru",
+        "Motorku",
+        "Mobilku",
+        "Masku",
+        "Hajiku",
+        "Souvenir",
+    ];
+
+    let chartData = [];
+
+    if (role === "Head Office") {
+        chartData = CATEGORY_LIST.map(cat => ({
+            name: cat,
+            value: chart.tabSummary?.[cat] || 0,
+        }));
+    } else if (role === "region") {
+        chartData = CATEGORY_LIST.map(cat => ({
+            name: cat,
+            value: chart.tabSummary?.[cat] || 0,
+        }));
+    } else {
+        chartData = CATEGORY_LIST.map(cat => ({
+            name: cat,
+            value: chart.tabSummary?.[cat] || 0,
+        }));
+    }
+
+    console.log(chartData);
+
+
 
     // ==========================================================
     // 🔸 Layout & Summary per Role
@@ -186,7 +228,7 @@ export default function Dashboard({ setIsLoggedIn }) {
             );
         }
 
-        if (role === "Region") {
+        if (role === "region") {
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ChartCard
@@ -262,8 +304,12 @@ export default function Dashboard({ setIsLoggedIn }) {
                     <h1 className="text-2xl font-bold text-gray-800">
                         Dashboard{" "}
                         {role === "Head Office"
-                            ? "Pusat"
-                            : userData.region_name || userData.branch_name}
+                            ? "Head Office"
+                            : role === "region"
+                                ? userData.region_name
+                                : role === "branch"
+                                    ? userData.branch_name
+                                    : ""}
                     </h1>
                 </div>
 
