@@ -41,7 +41,7 @@ import sTas from "../assets/souvenir/Tas.png";
 import sToples from "../assets/souvenir/Toples.png";
 
 export default function Insert() {
-    const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku", "Souvenir"];
+    const tabs = ["Motor Baru", "Motorku", "Mobilku", "Masku", "Hajiku", "Matprom"];
     const [activeTab, setActiveTab] = useState("Motor Baru");
     const [formData, setFormData] = useState({});
     const [zoomImg, setZoomImg] = useState(null);
@@ -80,7 +80,7 @@ export default function Insert() {
             "X Banner",
             "Spanduk Agen Hajiku",
         ],
-        "Souvenir": [
+        "Matprom": [
             "Jaket",
             "Toples",
             "Tas",
@@ -89,6 +89,8 @@ export default function Insert() {
             "Helm",
             "Jam Dinding",
             "Payung",
+            "Umbul-Umbul",
+            "X Banner"
         ],
     };
 
@@ -129,7 +131,7 @@ export default function Insert() {
             "X Banner": hXBanner,
             "Spanduk Agen Hajiku": hSpanduk,
         },
-        "Souvenir": {
+        "Matprom": {
             "Jaket": sJaket,
             "Toples": sToples,
             "Tas": sTas,
@@ -138,6 +140,8 @@ export default function Insert() {
             "Helm": sHelm,
             "Jam Dinding": sJam,
             "Payung": sPayung,
+            "Umbul-Umbul": sPayung,
+            "X Banner": sPayung,
         },
     };
 
