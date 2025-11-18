@@ -160,78 +160,100 @@ export default function Insert() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // 🔹 mulai loading
-
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const tabData = formData[activeTab] || {};
-
-        const convertToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = (err) => reject(err);
-            });
-        };
-
-        const items = {};
-        for (const key in tabData) {
-            const item = tabData[key];
-            let fileBase64 = "";
-            let fileName = "";
-
-            if (item.file) {
-                fileBase64 = await convertToBase64(item.file);
-                fileName = item.file.name;
-            }
-
-            items[key] = {
-                qty: item.qty || 0,
-                fileBase64,
-                fileName,
-            };
-        }
-
-        const payload = {
-            user: userData?.username,
-            branch: userData?.branch_name,
-            region: userData?.region_name,
-            branch_code: userData?.branch_code,
-            region_code: userData?.region_code,
-            role: userData?.role || "BRANCH",
-            tab: activeTab,
-            items,
-        };
+        setLoading(true);
 
         try {
-            await fetch(
-                "https://script.google.com/macros/s/AKfycbydM7j_3Joc3EJmLbUh4qGZO-kQlcVFLzi2xKnl0Rr_JbwMfaULbAwUwm9yHQslnJ2N/exec",
+            const userData = JSON.parse(localStorage.getItem("userData"));
+            const tabData = formData[activeTab] || {};
+
+            // Cek jika tidak ada item sama sekali
+            if (Object.keys(tabData).length === 0) {
+                setLoading(false);
+                Swal.fire({
+                    title: "Tidak Ada Data!",
+                    text: "Silakan isi data terlebih dahulu.",
+                    icon: "warning",
+                });
+                return;
+            }
+
+            // Convert File ke Base64
+            const convertToBase64 = (file) => {
+                return new Promise((resolve, reject) => {
+                    if (!file) return resolve("");
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = (err) => reject(err);
+                });
+            };
+
+            // Proses items
+            const items = {};
+
+            for (const key of Object.keys(tabData)) {
+                const item = tabData[key];
+                const hasFile = item.file instanceof File;
+
+                const fileBase64 = hasFile ? await convertToBase64(item.file) : "";
+                const fileName = hasFile ? item.file.name : "";
+
+                items[key] = {
+                    qty: Number(item.qty) || 0,
+                    fileBase64,
+                    fileName,
+                };
+            }
+
+            // Payload kirim ke Apps Script
+            const payload = {
+                user: userData?.username || "",
+                branch: userData?.branch_name || "",
+                region: userData?.region_name || "",
+                branch_code: userData?.branch_code || "",
+                region_code: userData?.region_code || "",
+                role: userData?.role || "BRANCH",
+                tab: activeTab,
+                items,
+            };
+
+            // Kirim ke Google Script
+            const response = await fetch(
+                "https://script.google.com/macros/s/AKfycbzCYb7H76cDw0u6NkU38eYVZEe4fU4dEsL6IXUmV2cW8MKoHd4hUBKUDUNVbM7zZSA/exec",
                 {
                     method: "POST",
                     body: JSON.stringify(payload),
                 }
             );
-            // alert("✅ Data berhasil dikirim ke server!");
-            Swal.fire({
-                title: "Insert Berhasil!",
-                text: `Berhasil Insert Data ${activeTab}.`,
-                icon: "success",
-                timer: 1500,
-                showConfirmButton: false,
-            });
 
-            setTimeout(() => {
-                setFormData({}); // kosongkan semua input
-                setLoading(false);
-            }, 1500);
+            const result = await response.json();
+
+            if (result.status === "success") {
+                Swal.fire({
+                    title: "Insert Berhasil!",
+                    text: `Berhasil Insert Data ${activeTab}.`,
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+
+                setTimeout(() => {
+                    setFormData({});
+                    setLoading(false);
+                }, 1500);
+            } else {
+                throw new Error(result.message || "Gagal insert data");
+            }
         } catch (error) {
-            console.error("❌ Error:", error);
+            console.error("❌ ERROR:", error);
             Swal.fire({
                 title: "Gagal!",
-                text: "Terjadi kesalahan saat mengirim data.",
+                text: error.message || "Terjadi kesalahan saat mengirim data.",
                 icon: "error",
             });
-            setLoading(false); // 🔹 selesai loading
+            setLoading(false);
         }
     };
 
