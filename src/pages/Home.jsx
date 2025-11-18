@@ -87,7 +87,7 @@ export default function Dashboard({ setIsLoggedIn }) {
         "Mobilku",
         "Masku",
         "Hajiku",
-        "Souvenir",
+        "Matprom",
     ];
 
     let chartData = [];
