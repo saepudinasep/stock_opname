@@ -166,48 +166,45 @@ export default function Insert() {
             const userData = JSON.parse(localStorage.getItem("userData"));
             const tabData = formData[activeTab] || {};
 
-            // Cek jika tidak ada item sama sekali
-            if (Object.keys(tabData).length === 0) {
-                setLoading(false);
-                Swal.fire({
-                    title: "Tidak Ada Data!",
-                    text: "Silakan isi data terlebih dahulu.",
-                    icon: "warning",
-                });
-                return;
-            }
-
-            // Convert File ke Base64
             const convertToBase64 = (file) => {
                 return new Promise((resolve, reject) => {
                     if (!file) return resolve("");
-
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
-
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = (err) => reject(err);
                 });
             };
 
-            // Proses items
-            const items = {};
+            let items = {};
 
+            // === FILTER qty > 0 ===
             for (const key of Object.keys(tabData)) {
                 const item = tabData[key];
+                const qtyValue = Number(item.qty) || 0;
+
+                if (qtyValue <= 0) continue; // ❌ JANGAN MASUKKAN KE PAYLOAD
+
                 const hasFile = item.file instanceof File;
 
-                const fileBase64 = hasFile ? await convertToBase64(item.file) : "";
-                const fileName = hasFile ? item.file.name : "";
-
                 items[key] = {
-                    qty: Number(item.qty) || 0,
-                    fileBase64,
-                    fileName,
+                    qty: qtyValue,
+                    fileBase64: hasFile ? await convertToBase64(item.file) : "",
+                    fileName: hasFile ? item.file.name : "",
                 };
             }
 
-            // Payload kirim ke Apps Script
+            // Jika semua qty = 0
+            if (Object.keys(items).length === 0) {
+                setLoading(false);
+                Swal.fire({
+                    title: "Tidak Ada Qty!",
+                    text: "Semua item memiliki qty 0. Tidak ada yang bisa di-insert.",
+                    icon: "warning",
+                });
+                return;
+            }
+
             const payload = {
                 user: userData?.username || "",
                 branch: userData?.branch_name || "",
@@ -219,9 +216,8 @@ export default function Insert() {
                 items,
             };
 
-            // Kirim ke Google Script
             const response = await fetch(
-                "https://script.google.com/macros/s/AKfycbzCYb7H76cDw0u6NkU38eYVZEe4fU4dEsL6IXUmV2cW8MKoHd4hUBKUDUNVbM7zZSA/exec",
+                "https://script.google.com/macros/s/AKfycbwNCdNueJow9q5LZZpufuX3gKovy4ADX_rP_u9Wn-noyWkgZAJvlpYQNHQ4BOoQSFzl/exec",
                 {
                     method: "POST",
                     body: JSON.stringify(payload),
@@ -256,6 +252,7 @@ export default function Insert() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="bg-gray-100 min-h-screen p-10">
