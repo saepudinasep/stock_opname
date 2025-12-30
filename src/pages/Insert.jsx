@@ -323,12 +323,12 @@ export default function Insert() {
                                     <span className="text-sm text-green-600">File siap diupload</span>
                                 )}
                             </label>
-                            <img
+                            {/* <img
                                 src={imgSrc}
                                 alt="preview"
                                 onClick={() => setZoomImg(imgSrc)}
                                 className="h-16 w-16 object-cover mt-2 md:mt-0 rounded cursor-pointer hover:scale-105 transition"
-                            />
+                            /> */}
                         </div>
                     );
                 })}

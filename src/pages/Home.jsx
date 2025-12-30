@@ -12,7 +12,7 @@ export default function Dashboard({ setIsLoggedIn }) {
     const navigate = useNavigate();
 
     const API_URL =
-        "https://script.google.com/macros/s/AKfycbwNCdNueJow9q5LZZpufuX3gKovy4ADX_rP_u9Wn-noyWkgZAJvlpYQNHQ4BOoQSFzl/exec"; // Ganti dengan URL Apps Script kamu
+        "https://script.google.com/macros/s/AKfycbwjOxxAwDlaON2LHbbdPMpEHMlmjOEhqR56Dm_pLjV6Arw8o9caaNPTi6gwJFA0pDUj/exec"; // Ganti dengan URL Apps Script kamu
 
     useEffect(() => {
         const saved = localStorage.getItem("userData");
@@ -327,7 +327,7 @@ export default function Dashboard({ setIsLoggedIn }) {
                 {renderCharts()}
 
                 {/* Activity Table */}
-                <ActivityTable data={activities} />
+                <ActivityTable data={activities} pageSize={10} />
             </div>
         </div>
     );
